@@ -29,9 +29,9 @@ public class ImageAdapterRecyclerView extends RecyclerView.Adapter<ImageAdapterR
     int spanCount;
 
 
-    public ImageAdapterRecyclerView(Context context, ImageResults imageResults, int spanCount) {
+    public ImageAdapterRecyclerView(Context context, List<ImageModel> imageModels, int spanCount) {
         this.context = context;
-        this.imageModels = imageResults.getImageResults();
+        this.imageModels = imageModels;
         this.spanCount=spanCount;
     }
 

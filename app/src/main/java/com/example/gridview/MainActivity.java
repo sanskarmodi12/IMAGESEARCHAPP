@@ -2,10 +2,13 @@ package com.example.gridview;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +17,15 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 
 import com.example.gridview.Adapters.ImageAdapter;
 import com.example.gridview.Adapters.ImageAdapterRecyclerView;
 import com.example.gridview.Interfaces.Myapi;
+import com.example.gridview.Models.ImageModel;
 import com.example.gridview.Models.ImageResults;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -38,6 +44,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     GridLayoutManager gridLayoutManager;
     ImageAdapterRecyclerView imageAdapterRecyclerView;
     ImageResults data;
+    NestedScrollView  nestedScrollView;
+    ProgressBar progressBar;
+   List<ImageModel>imageModels;
+    int page;
 
     public  void onFilter(View v)
     {
@@ -51,26 +61,49 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public void onSearch(View v)
     {
 //         gridLayoutManager.setSpanCount(3);
+        page=0;
 
 
         recyclerView.setLayoutManager(gridLayoutManager);
 
+        getData(0);
+        imageModels.clear();
 
 
 
 
-        Retrofit retrofit=new Retrofit.Builder().baseUrl(url).addConverterFactory(GsonConverterFactory.create()).build();
-
-        Myapi myapi=retrofit.create(Myapi.class);
 
 
 
 
-        Call<ImageResults> call=myapi.getImageResults(et_searched_name.getText().toString());
+
+
+
+
+
+
+    }
+
+    private void getData(int page) {
+        progressBar.setVisibility(View.INVISIBLE);
+        Call<ImageResults> call=RetrofitClient.getInstance()
+                .getApi().getImageResults(et_searched_name.getText().toString(),page);
         call.enqueue(new Callback<ImageResults>() {
             @Override
             public void onResponse(Call<ImageResults> call, Response<ImageResults> response) {
-                 data=response.body();
+
+                data= response.body();
+                ImageResults imageResults=data;
+                List<ImageModel> imageModels2=imageResults.getImageResults();
+                if(imageModels==null||imageModels2==null)
+                {
+                    Log.i("List ended","ends");
+                    return ;
+                }
+                imageModels.addAll(imageModels2);
+                Log.i("sizeusa", String.valueOf(imageModels.size()));
+
+
 //                ImageAdapter imageAdapter=new ImageAdapter(MainActivity.this,data);
 
 
@@ -78,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 GridLayoutManager gridLayoutManager1=gridLayoutManager;
 
 
-                 imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,data,gridLayoutManager1.getSpanCount());
+                imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,imageModels,gridLayoutManager1.getSpanCount());
                 recyclerView.setAdapter(imageAdapterRecyclerView);
 
 
@@ -89,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             }
         });
-
     }
 
 
@@ -97,12 +129,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        imageModels=new ArrayList<ImageModel>();
 
 //        gridView=(GridView) findViewById(R.id.grid_view_image);
 //
 //        ImageAdapter imageAdapter=new ImageAdapter(MainActivity.this,new ImageResults());
 //
 //        gridView.setAdapter(imageAdapter);
+
          gridLayoutManager=new GridLayoutManager(this,2);
 
 
@@ -113,10 +147,23 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         et_searched_name=(EditText) findViewById(R.id.et_searched_name);
         searchbt= (ImageView) findViewById(R.id.searchbt);
+        nestedScrollView=(NestedScrollView) findViewById(R.id.scroll_view);
+        progressBar=(ProgressBar) findViewById(R.id.progressBar2);
 
 
+        nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if(scrollY==v.getChildAt(0).getMeasuredHeight()-v.getMeasuredHeight())
+                {
+                    page++;
+                    progressBar.setVisibility(View.VISIBLE);
+                    getData(page);
 
 
+                }
+            }
+        });
 
 
     }
@@ -155,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         gridLayoutManager.setSpanCount(spanCount);
 
-        imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,data,spanCount);
+        imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,imageModels,spanCount);
         recyclerView.setAdapter(imageAdapterRecyclerView);
 
         return true;
