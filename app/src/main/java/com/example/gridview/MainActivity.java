@@ -69,20 +69,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         getData(0);
         imageModels.clear();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
+
+
 
     private void getData(int page) {
         progressBar.setVisibility(View.INVISIBLE);
@@ -131,11 +120,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         setContentView(R.layout.activity_main);
         imageModels=new ArrayList<ImageModel>();
 
-//        gridView=(GridView) findViewById(R.id.grid_view_image);
-//
-//        ImageAdapter imageAdapter=new ImageAdapter(MainActivity.this,new ImageResults());
-//
-//        gridView.setAdapter(imageAdapter);
+
+
+
 
          gridLayoutManager=new GridLayoutManager(this,2);
 
@@ -149,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         searchbt= (ImageView) findViewById(R.id.searchbt);
         nestedScrollView=(NestedScrollView) findViewById(R.id.scroll_view);
         progressBar=(ProgressBar) findViewById(R.id.progressBar2);
+//        progressBar.setVisibility(View.INVISIBLE);
 
 
         nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
