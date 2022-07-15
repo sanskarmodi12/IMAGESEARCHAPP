@@ -115,38 +115,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         searchbt= (ImageView) findViewById(R.id.searchbt);
 
 
-//
-//
-//
-//
-//        Retrofit retrofit=new Retrofit.Builder().baseUrl(url).addConverterFactory(GsonConverterFactory.create()).build();
-//
-//        Myapi myapi=retrofit.create(Myapi.class);
-//
-//
-//
-//
-//        Call<ImageResults> call=myapi.getImageResults();
-//        call.enqueue(new Callback<ImageResults>() {
-//            @Override
-//            public void onResponse(Call<ImageResults> call, Response<ImageResults> response) {
-//                ImageResults data=response.body();
-////                ImageAdapter imageAdapter=new ImageAdapter(MainActivity.this,data);
-//
-//
-////                gridView.setAdapter(imageAdapter);
-//
-//                ImageAdapterRecyclerView imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,data);
-//                recyclerView.setAdapter(imageAdapterRecyclerView);
-//
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ImageResults> call, Throwable t) {
-//
-//            }
-//        });
 
 
 
@@ -156,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         int spanCount=2;
+        if(data==null)
+            data=new ImageResults();
+
         switch(item.getItemId())
         {
             case R.id.size_1:
@@ -183,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
 
         gridLayoutManager.setSpanCount(spanCount);
+
         imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,data,spanCount);
         recyclerView.setAdapter(imageAdapterRecyclerView);
 
