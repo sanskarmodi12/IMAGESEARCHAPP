@@ -17,7 +17,7 @@ import android.widget.RelativeLayout;
 import com.bumptech.glide.Glide;
 import com.example.gridview.Models.BitMapTransfer;
 import com.example.gridview.Models.ImageModel;
-
+// DISPLAY IMAGE IN SHARED TRANSITION
 public class DisplayImage extends AppCompatActivity {
     ImageView imageView;
     RelativeLayout relativeLayout;

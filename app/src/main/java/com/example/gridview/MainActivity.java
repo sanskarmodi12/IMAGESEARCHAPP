@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     String searchedName;
     private boolean isLoading = false;
 
+    // FILTER FOR GRID SIZE
+
     public  void onFilter(View v)
     {
         PopupMenu popupMenu=new PopupMenu(this,v);
@@ -84,9 +86,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     private void getData(int page)  {
 //        progressBar.setVisibility(View.INVISIBLE);
 
-        //check for cache first
-        //get the bitmap values as list of imagemodels from localDb
-
+        // DATA FROM DB
 
 
         List<ImageModel>imageModels2= CacheImageManager.getImage(MainActivity.this,searchedName,page);
@@ -171,12 +171,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //        progressBar.setVisibility(View.INVISIBLE);
 
 
-
+//      ADD new Pages when list ends
         recyclerView.addOnScrollListener(new PaginationScrollListener(gridLayoutManager,searchedName) {
             @Override
             protected void loadMoreItems() {
                 isLoading = true;
               page += 1;
+              // add new page
                 getData(page);
             }
 
@@ -193,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     }
 
     @Override
+
+    //CODE FOR SELECTING GRID SIZE
     public boolean onMenuItemClick(MenuItem item) {
         int spanCount=2;
         if(data==null)
