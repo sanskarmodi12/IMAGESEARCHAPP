@@ -46,11 +46,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     GridLayoutManager gridLayoutManager;
     ImageAdapterRecyclerView imageAdapterRecyclerView;
     ImageResults data;
-    NestedScrollView  nestedScrollView;
+
     ProgressBar progressBar;
   List<ImageModel>imageModels;
     static int page;
     String searchedName;
+    private boolean isLoading = false;
 
     public  void onFilter(View v)
     {
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
 
     private void getData(int page)  {
-        progressBar.setVisibility(View.INVISIBLE);
+//        progressBar.setVisibility(View.INVISIBLE);
 
         //check for cache first
         //get the bitmap values as list of imagemodels from localDb
@@ -95,12 +96,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
             imageModels.addAll(imageModels2);
 
-            GridLayoutManager gridLayoutManager1=gridLayoutManager;
+//            GridLayoutManager gridLayoutManager1=gridLayoutManager;
 
 
-            imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,imageModels,gridLayoutManager1.getSpanCount());
+            imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,imageModels,gridLayoutManager.getSpanCount());
             recyclerView.setAdapter(imageAdapterRecyclerView);
             Toast.makeText(MainActivity.this,"data from local",Toast.LENGTH_SHORT).show();
+            isLoading=false;
 
 
 
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         // data from api
         else {
 
+            Toast.makeText(MainActivity.this,"Loading "+searchedName+"images from Internet",Toast.LENGTH_SHORT).show();
 
             Call<ImageResults> call = RetrofitClient.getInstance()
                     .getApi().getImageResults(searchedName, page);
@@ -127,11 +130,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     CacheImageManager.putImageData(MainActivity.this, imageModels2, searchedName, page);
 
 
-                    GridLayoutManager gridLayoutManager1 = gridLayoutManager;
+//                    GridLayoutManager gridLayoutManager1 = gridLayoutManager;
 
 
-                    imageAdapterRecyclerView = new ImageAdapterRecyclerView(MainActivity.this, imageModels, gridLayoutManager1.getSpanCount());
+                    imageAdapterRecyclerView = new ImageAdapterRecyclerView(MainActivity.this, imageModels, gridLayoutManager.getSpanCount());
                     recyclerView.setAdapter(imageAdapterRecyclerView);
+                    isLoading=false;
+
 
 
                 }
@@ -149,40 +154,40 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        imageModels=new ArrayList<ImageModel>();
+        imageModels = new ArrayList<ImageModel>();
 
 
+        gridLayoutManager = new GridLayoutManager(this, 2);
 
 
-
-         gridLayoutManager=new GridLayoutManager(this,2);
-
-
-
-        recyclerView=findViewById(R.id.recycler_view);
+        recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(gridLayoutManager);
 
 
-        et_searched_name=(EditText) findViewById(R.id.et_searched_name);
-        searchbt= (ImageView) findViewById(R.id.searchbt);
-        nestedScrollView=(NestedScrollView) findViewById(R.id.scroll_view);
-        progressBar=(ProgressBar) findViewById(R.id.progressBar2);
+        et_searched_name = (EditText) findViewById(R.id.et_searched_name);
+        searchbt = (ImageView) findViewById(R.id.searchbt);
+
+        progressBar = (ProgressBar) findViewById(R.id.progressBar2);
 //        progressBar.setVisibility(View.INVISIBLE);
 
 
-        nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+
+        recyclerView.addOnScrollListener(new PaginationScrollListener(gridLayoutManager,searchedName) {
             @Override
-            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if(scrollY==v.getChildAt(0).getMeasuredHeight()-v.getMeasuredHeight())
-                {
-                    page++;
-                    progressBar.setVisibility(View.VISIBLE);
-                    getData(page);
-
-
-                }
+            protected void loadMoreItems() {
+                isLoading = true;
+              page += 1;
+                getData(page);
             }
+
+            @Override
+            public boolean isLoading() {
+                return isLoading;
+            }
+
+
         });
+
 
 
     }

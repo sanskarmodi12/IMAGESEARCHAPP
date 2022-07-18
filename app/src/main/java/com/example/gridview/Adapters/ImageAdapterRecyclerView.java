@@ -102,24 +102,6 @@ public class ImageAdapterRecyclerView extends RecyclerView.Adapter<ImageAdapterR
                 Intent intent = new Intent(context, DisplayImage.class);
                 intent.putExtra("imageUrl",imageUrl);
                 BitMapTransfer.bitmap=imageBitMap;
-//                intent.putExtra("imageBit",imageBitMap)
-//                Intent intent;
-//                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                if(imageBitMap!=null){
-//                imageBitMap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-//                byte[] byteArray = stream.toByteArray();
-//                     intent = new Intent(context, DisplayImage.class);
-//
-//                intent.putExtra("keyobj", byteArray);
-//                intent.putExtra("keyobj1","true");
-//                    intent.putExtra("imageUrl",imageUrl);
-//                }
-//                else
-//                {
-//                     intent = new Intent(context, DisplayImage.class);
-//                    intent.putExtra("keyobj1","false");
-//                    intent.putExtra("imageUrl",imageUrl);
-//                }
 
 
                 ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
