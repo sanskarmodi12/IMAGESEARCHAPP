@@ -18,10 +18,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.gridview.Adapters.ImageAdapter;
 import com.example.gridview.Adapters.ImageAdapterRecyclerView;
 import com.example.gridview.Interfaces.Myapi;
+import com.example.gridview.LocalDb.CacheImageManager;
 import com.example.gridview.Models.ImageModel;
 import com.example.gridview.Models.ImageResults;
 
@@ -46,8 +48,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     ImageResults data;
     NestedScrollView  nestedScrollView;
     ProgressBar progressBar;
-   List<ImageModel>imageModels;
-    int page;
+  List<ImageModel>imageModels;
+    static int page;
+    String searchedName;
 
     public  void onFilter(View v)
     {
@@ -63,54 +66,82 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 //         gridLayoutManager.setSpanCount(3);
         page=0;
 
-
+        searchedName=et_searched_name.getText().toString();
+        if(searchedName.equals(""))
+        {
+            Toast.makeText(MainActivity.this,"PLs enter the item to  be searched",Toast.LENGTH_SHORT).show();
+            return ;
+        }
         recyclerView.setLayoutManager(gridLayoutManager);
-
+        imageModels=new ArrayList<>();
         getData(0);
-        imageModels.clear();
 
     }
 
 
 
-    private void getData(int page) {
+    private void getData(int page)  {
         progressBar.setVisibility(View.INVISIBLE);
-        Call<ImageResults> call=RetrofitClient.getInstance()
-                .getApi().getImageResults(et_searched_name.getText().toString(),page);
-        call.enqueue(new Callback<ImageResults>() {
-            @Override
-            public void onResponse(Call<ImageResults> call, Response<ImageResults> response) {
 
-                data= response.body();
-                ImageResults imageResults=data;
-                List<ImageModel> imageModels2=imageResults.getImageResults();
-                if(imageModels==null||imageModels2==null)
-                {
-                    Log.i("List ended","ends");
-                    return ;
+        //check for cache first
+        //get the bitmap values as list of imagemodels from localDb
+
+
+
+        List<ImageModel>imageModels2= CacheImageManager.getImage(MainActivity.this,searchedName,page);
+
+        if((imageModels2!=null)&&imageModels2.size()!=0)
+        {
+
+            imageModels.addAll(imageModels2);
+
+            GridLayoutManager gridLayoutManager1=gridLayoutManager;
+
+
+            imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,imageModels,gridLayoutManager1.getSpanCount());
+            recyclerView.setAdapter(imageAdapterRecyclerView);
+            Toast.makeText(MainActivity.this,"data from local",Toast.LENGTH_SHORT).show();
+
+
+
+        }
+        // data from api
+        else {
+
+
+            Call<ImageResults> call = RetrofitClient.getInstance()
+                    .getApi().getImageResults(searchedName, page);
+            call.enqueue(new Callback<ImageResults>() {
+                @Override
+                public void onResponse(Call<ImageResults> call, Response<ImageResults> response) {
+
+                    data = response.body();
+                    ImageResults imageResults = data;
+                    List<ImageModel> imageModels2 = imageResults.getImageResults();
+                    if (imageModels == null || imageModels2 == null) {
+                        Log.i("List ended", "ends");
+                        return;
+                    }
+                    imageModels.addAll(imageModels2);
+                    Log.i("sizeusa", String.valueOf(imageModels.size()));
+                    CacheImageManager.putImageData(MainActivity.this, imageModels2, searchedName, page);
+
+
+                    GridLayoutManager gridLayoutManager1 = gridLayoutManager;
+
+
+                    imageAdapterRecyclerView = new ImageAdapterRecyclerView(MainActivity.this, imageModels, gridLayoutManager1.getSpanCount());
+                    recyclerView.setAdapter(imageAdapterRecyclerView);
+
+
                 }
-                imageModels.addAll(imageModels2);
-                Log.i("sizeusa", String.valueOf(imageModels.size()));
 
+                @Override
+                public void onFailure(Call<ImageResults> call, Throwable t) {
 
-//                ImageAdapter imageAdapter=new ImageAdapter(MainActivity.this,data);
-
-
-//                gridView.setAdapter(imageAdapter);
-                GridLayoutManager gridLayoutManager1=gridLayoutManager;
-
-
-                imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,imageModels,gridLayoutManager1.getSpanCount());
-                recyclerView.setAdapter(imageAdapterRecyclerView);
-
-
-            }
-
-            @Override
-            public void onFailure(Call<ImageResults> call, Throwable t) {
-
-            }
-        });
+                }
+            });
+        }
     }
 
 
@@ -191,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         gridLayoutManager.setSpanCount(spanCount);
 
         imageAdapterRecyclerView=new ImageAdapterRecyclerView(MainActivity.this,imageModels,spanCount);
+        Log.i("imgmodle", String.valueOf(imageModels));
         recyclerView.setAdapter(imageAdapterRecyclerView);
 
         return true;
